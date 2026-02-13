@@ -78,6 +78,21 @@ const elements: Element[] = [
     locator: (page: Page): Locator => page.getByRole('button', { name: 'Search (Command+K)' }),
     name: 'Search (Command+K)',
   },
+  {
+    locator: (page: Page): Locator =>
+      page.getByRole('heading', { name: 'Playwright enables reliable' }),
+    name: 'Playwright enables reliable',
+    text: 'Playwright enables reliable end-to-end testing for modern web apps.',
+  },
+  {
+    locator: (page: Page): Locator => page.getByRole('link', { name: 'Get started' }),
+    name: 'Get started button',
+    text: 'Get started',
+    attribute: {
+      type: 'href',
+      value: '/docs/intro',
+    },
+  },
 ];
 
 test.describe('Тесты главной страницы', () => {
@@ -122,18 +137,23 @@ test.describe('Тесты главной страницы', () => {
   });
 
   test('Проверка правильности заголовка страницы', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: 'Playwright enables reliable' })).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Playwright enables reliable' })).toContainText(
-      'Playwright enables reliable end-to-end testing for modern web apps.',
-    );
+    for (const { locator, name, text } of elements) {
+      if (name === 'Playwright enables reliable' && text) {
+        await expect.soft(locator(page)).toBeVisible();
+        await expect.soft(locator(page)).toContainText(text);
+      }
+    }
   });
 
   test('Проверка корректной работы кнопки Get Started', async ({ page }) => {
-    await expect.soft(page.getByRole('link', { name: 'Get started' })).toBeVisible();
-    await expect.soft(page.getByRole('link', { name: 'Get started' })).toHaveText('Get started');
-    await expect
-      .soft(page.getByRole('link', { name: 'Get started' }))
-      .toHaveAttribute('href', '/docs/intro');
-    await page.getByRole('link', { name: 'Get started' }).click();
+    for (const { locator, name, text, attribute } of elements) {
+      if (name === 'Get started button' && text && attribute) {
+        await expect.soft(locator(page)).toBeVisible();
+        await expect.soft(locator(page)).toHaveText(text);
+        await expect.soft(locator(page)).toHaveAttribute(attribute.type, attribute.value);
+        await locator(page).click();
+        await expect(page).toHaveURL('https://playwright.dev/docs/intro');
+      }
+    }
   });
 });
