@@ -128,14 +128,6 @@ test.describe('Тесты главной страницы', () => {
     });
   });
 
-  test('Проверка переключение цветового мода страницы', async ({ page }) => {
-    await expect(page.locator('html')).toHaveAttribute('data-theme-choice', 'system');
-    await page.getByRole('button', { name: 'Switch between dark and light' }).click();
-    await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
-    await page.getByRole('button', { name: 'Switch between dark and light' }).click();
-    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
-  });
-
   test('Проверка правильности заголовка страницы', async ({ page }) => {
     for (const { locator, name, text } of elements) {
       if (name === 'Playwright enables reliable' && text) {
@@ -155,5 +147,22 @@ test.describe('Тесты главной страницы', () => {
         await expect(page).toHaveURL('https://playwright.dev/docs/intro');
       }
     }
+  });
+
+  test('Проверка переключение цветового мода страницы', async ({ page }) => {
+    await expect(page.locator('html')).toHaveAttribute('data-theme-choice', 'system');
+    await page.getByRole('button', { name: 'Switch between dark and light' }).click();
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+    await page.getByRole('button', { name: 'Switch between dark and light' }).click();
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+  });
+
+  ['light', 'dark'].forEach((value) => {
+    test(`Проверка стилей активного ${value} мода`, async ({ page }) => {
+      await page.evaluate((value) => {
+        document.querySelector('html')?.setAttribute('data-theme', value);
+      }, value);
+      await expect(page).toHaveScreenshot(`pageWith${value}Mode.png`);
+    });
   });
 });
